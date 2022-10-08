@@ -24,14 +24,15 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      # - "--api.insecure=true"
-      # - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      # - "--certificatesresolvers.myresolver.acme.email=michele.mastrogiovanni@gmail.com"
-      # - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--api.insecure=true"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=michele.mastrogiovanni@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "443:443/tcp"
       - "8080:8080"
     volumes:
+      - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   backend:
@@ -41,9 +42,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
-      # - "traefik.http.routers.backend.tls.certresolver=myresolver"
-      # Host(`${NODE_HOST:-localhost}`) && 
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api/`)"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.routers.backend.rule=Host(`${NODE_HOST}`) && PathPrefix(`/api/`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
@@ -65,10 +65,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
-      # - "traefik.http.routers.frontend.tls.certresolver=myresolver"
-      # - "traefik.http.routers.frontend.entrypoints=web"
-      # Host(`${NODE_HOST:-localhost}`) && 
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.routers.frontend.rule=Host(`${NODE_HOST}`) && PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
     # environment:
     #   DATABASE_NAME: ${DATABASE_NAME}
@@ -82,6 +80,15 @@ services:
     depends_on: 
       - mongo
       - traefik
+
+  # whoami:
+  #   image: "traefik/whoami"
+  #   # container_name: "simple-service"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.whoami.rule=Host(`${NODE_HOST}`)"
+  #     - "traefik.http.routers.whoami.entrypoints=websecure"
+  #     - "traefik.http.routers.whoami.tls.certresolver=myresolver"    
 
 volumes:
   mongodb_data_container:
