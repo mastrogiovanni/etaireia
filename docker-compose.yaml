@@ -1,0 +1,87 @@
+version: '3.7'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: "mongo"
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    # ports:
+    #  - 27017:27017
+    volumes:
+    #  - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodb_data_container:/data/db
+  
+  traefik:
+    image: "traefik:v2.6"
+    container_name: "traefik"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # - "--api.insecure=true"
+      # - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      # - "--certificatesresolvers.myresolver.acme.email=michele.mastrogiovanni@gmail.com"
+      # - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443/tcp"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  backend:
+    build:
+      context: ./digital-signature-backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      # - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      # Host(`${NODE_HOST:-localhost}`) && 
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api/`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+    environment:
+      PORT: 3000
+      # DATABASE_NAME: ${DATABASE_NAME}
+      # IOTA_HORNET_NODE: ${IOTA_HORNET_NODE}
+      # IOTA_PERMA_NODE: ${IOTA_PERMA_NODE}
+      # DATABASE_URL: ${DATABASE_URL}
+      # SERVER_SECRET: ${SERVER_SECRET}
+      # JWT_SECRET: ${JWT_SECRET}
+    restart: always
+    depends_on: 
+      - mongo
+      - traefik
+
+  frontend:
+    build:
+      context: ./digital-signature
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      # - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      # - "traefik.http.routers.frontend.entrypoints=web"
+      # Host(`${NODE_HOST:-localhost}`) && 
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+    # environment:
+    #   DATABASE_NAME: ${DATABASE_NAME}
+    #   IOTA_HORNET_NODE: ${IOTA_HORNET_NODE}
+    #   IOTA_PERMA_NODE: ${IOTA_PERMA_NODE}
+    #   DATABASE_URL: ${DATABASE_URL}
+    #   SERVER_SECRET: ${SERVER_SECRET}
+    #   JWT_SECRET: ${JWT_SECRET}
+    restart: on-failure
+    # command: node dist/index.js setup-api
+    depends_on: 
+      - mongo
+      - traefik
+
+volumes:
+  mongodb_data_container:
