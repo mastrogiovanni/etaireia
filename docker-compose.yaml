@@ -2,21 +2,24 @@ version: '3.7'
 services:
 
   ds-mongo:
+    profiles: ["dev"]
     image: mongo:latest
-    container_name: "ds-mongo"
     restart: always
     environment:
       MONGO_INITDB_DATABASE: ${DATABASE_NAME}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
     # - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - mongodb_data_container:/data/db
+    ports:
+      - "27017:27017"
   
   ds-traefik-prod:
     profiles: ["prod"]
     image: "traefik:v2.6"
     command:
+      - "--providers.docker.constraints=Label(`mastrogiovanni.project`,`digital-dignature`)"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -30,6 +33,7 @@ services:
     ports:
       - "443:443/tcp"
       - "8080:8080"
+    restart: always
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -45,6 +49,7 @@ services:
     ports:
       - "80:80/tcp"
       - "8080:8080"
+    restart: always
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -54,6 +59,7 @@ services:
     build:
       context: ./digital-signature-backend
     labels:
+      - "mastrogiovanni.project=digital-dignature"
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
@@ -62,15 +68,12 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
-      # DATABASE_NAME: ${DATABASE_NAME}
-      # IOTA_HORNET_NODE: ${IOTA_HORNET_NODE}
-      # IOTA_PERMA_NODE: ${IOTA_PERMA_NODE}
-      # DATABASE_URL: ${DATABASE_URL}
-      # SERVER_SECRET: ${SERVER_SECRET}
-      # JWT_SECRET: ${JWT_SECRET}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_URL: mongodb://ds-mongo
+
     restart: always
     depends_on: 
-      - ds-mongo
       - ds-traefik-prod
 
   ds-backend-dev:
@@ -78,18 +81,16 @@ services:
     build:
       context: ./digital-signature-backend
     labels:
+      - "mastrogiovanni.project=digital-dignature"
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api/`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
-      # DATABASE_NAME: ${DATABASE_NAME}
-      # IOTA_HORNET_NODE: ${IOTA_HORNET_NODE}
-      # IOTA_PERMA_NODE: ${IOTA_PERMA_NODE}
-      # DATABASE_URL: ${DATABASE_URL}
-      # SERVER_SECRET: ${SERVER_SECRET}
-      # JWT_SECRET: ${JWT_SECRET}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_URL: ${MONGO_URL}
     restart: always
     depends_on: 
       - ds-mongo
@@ -100,23 +101,18 @@ services:
     build:
       context: ./digital-signature
     labels:
+      - "mastrogiovanni.project=digital-dignature"
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
       - "traefik.http.routers.frontend.rule=Host(`${NODE_HOST}`) && PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-    # environment:
-    #   DATABASE_NAME: ${DATABASE_NAME}
-    #   IOTA_HORNET_NODE: ${IOTA_HORNET_NODE}
-    #   IOTA_PERMA_NODE: ${IOTA_PERMA_NODE}
-    #   DATABASE_URL: ${DATABASE_URL}
-    #   SERVER_SECRET: ${SERVER_SECRET}
-    #   JWT_SECRET: ${JWT_SECRET}
+    environment:
+      PORT: 3000
     restart: on-failure
     # command: node dist/index.js setup-api
     depends_on: 
-      - ds-mongo
       - ds-traefik-prod
 
   ds-frontend-dev:
@@ -124,17 +120,13 @@ services:
     build:
       context: ./digital-signature
     labels:
+      - "mastrogiovanni.project=digital-dignature"
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-    # environment:
-    #   DATABASE_NAME: ${DATABASE_NAME}
-    #   IOTA_HORNET_NODE: ${IOTA_HORNET_NODE}
-    #   IOTA_PERMA_NODE: ${IOTA_PERMA_NODE}
-    #   DATABASE_URL: ${DATABASE_URL}
-    #   SERVER_SECRET: ${SERVER_SECRET}
-    #   JWT_SECRET: ${JWT_SECRET}
+    environment:
+      PORT: 3000
     restart: on-failure
     # command: node dist/index.js setup-api
     depends_on: 
