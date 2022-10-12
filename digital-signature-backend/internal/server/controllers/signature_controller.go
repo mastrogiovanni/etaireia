@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/hex"
 	"errors"
-	"fmt"
 	"io/ioutil"
+	"log"
+
+	"crypto/ed25519"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mastrogiovanni/digital-signature-backend/internal/database"
@@ -18,7 +21,7 @@ func SignController(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("Saving %s (size: %d)\n", signRequest.Document.Filename, signRequest.Document.Size)
+	log.Printf("Saving %s (size: %d)\n", signRequest.Document.Filename, signRequest.Document.Size)
 
 	file, err := signRequest.Document.Open()
 	if err != nil {
@@ -26,17 +29,15 @@ func SignController(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Read fully")
-
 	buffer, err := ioutil.ReadAll(file)
 	if err != nil {
 		models.ResponseError(c, err)
 		return
 	}
 
-	fmt.Printf("Public Key: '%s', Signature: '%s', File Size: %d\n", signRequest.PublicKey, signRequest.Signature, len(buffer))
+	log.Printf("Public Key: '%s', Signature: '%s', File Size: %d\n", signRequest.PublicKey, signRequest.Signature, len(buffer))
 
-	user, err := database.FindByPublicKey(signRequest.PublicKey)
+	user, err := database.FindSubscriptionByPublicKey(signRequest.PublicKey)
 	if err != nil {
 		models.ResponseError(c, err)
 		return
@@ -46,9 +47,27 @@ func SignController(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("Signed By: '%s %s',\n", user.Name, user.Surname)
+	signatureBytes, err := hex.DecodeString(signRequest.Signature)
+	if err != nil {
+		models.ResponseError(c, err)
+		return
+	}
 
-	err = database.InsertSignedDocument(&database.Signed{
+	publicKeyBytes, err := hex.DecodeString(signRequest.PublicKey)
+	if err != nil {
+		models.ResponseError(c, err)
+		return
+	}
+
+	verified := ed25519.Verify(publicKeyBytes, buffer, signatureBytes)
+	if !verified {
+		models.ResponseError(c, errors.New("signature is not valid"))
+		return
+	}
+
+	log.Printf("Signed By: '%s %s',\n", user.Name, user.Surname)
+
+	err = database.CreateSignedDocument(&database.Signed{
 		Document:  buffer,
 		PublicKey: signRequest.PublicKey,
 		Signature: signRequest.Signature,

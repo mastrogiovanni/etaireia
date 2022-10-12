@@ -22,7 +22,7 @@
     formData.append("surname", surname);
     formData.append("publicKey", toHex(publicKey));
 
-    const response = await fetch("/api/v1/upload", {
+    const response = await fetch("/api/v1/subscription", {
       method: "POST",
       body: formData,
     });

@@ -70,7 +70,7 @@ services:
       PORT: 3000
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_URL: mongodb://ds-mongo
+      MONGO_URL: ${MONGO_URL}
 
     restart: always
     depends_on: 
@@ -90,7 +90,7 @@ services:
       PORT: 3000
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_URL: ${MONGO_URL}
+      MONGO_URL: mongodb://ds-mongo
     restart: always
     depends_on: 
       - ds-mongo

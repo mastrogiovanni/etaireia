@@ -17,7 +17,9 @@ func NewRouter() (*gin.Engine, error) {
 
 	engine.POST("/api/v1/sign", controllers.SignController)
 
-	engine.POST("/api/v1/upload", controllers.UploadController)
+	engine.POST("/api/v1/subscription", controllers.CreateSubscription)
+	engine.GET("/api/v1/subscription", controllers.ListSubscription)
+	engine.POST("/api/v1/subscription/approve", controllers.SubscriptionApprove)
 
 	return engine, nil
 

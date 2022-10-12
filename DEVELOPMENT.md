@@ -8,7 +8,7 @@ Open a terminal and run the backend:
 
 ```
 cd digital-signature-backend
-go run src/main.go
+PORT=3001 go run cmd/digital-signature-backend/main.go
 ```
 
 Backend will be listening on default port 3001 

@@ -7,12 +7,17 @@ import (
 )
 
 type DSResponse struct {
-	Success bool    `json:"success"`
-	Message *string `json:"message"`
+	Success bool        `json:"success"`
+	Message *string     `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 func ResponseSuccess(c *gin.Context) {
 	c.JSON(http.StatusOK, DSResponse{Success: true})
+}
+
+func ResponseSuccessWithData(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusOK, DSResponse{Success: true, Data: data})
 }
 
 func ResponseFail(c *gin.Context, message string) {

@@ -17,7 +17,7 @@ type Signed struct {
 	Timestamp time.Time `bson:"timestamp,omitempty"`
 }
 
-func InsertSignedDocument(signedDocument *Signed) error {
+func CreateSignedDocument(signedDocument *Signed) error {
 
 	signedDocument.Timestamp = time.Now()
 
