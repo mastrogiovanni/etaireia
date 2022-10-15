@@ -1,3 +1,5 @@
+import { credential } from './stores';
+
 // padd with leading 0 if <16
 function i2hex(i) {
     return ("0" + i.toString(16)).slice(-2);
@@ -15,7 +17,8 @@ export function fromHex(string) {
 }
 
 export function clearCredential() {
-    localStorage.removeItem("digital.signature")
+    localStorage.removeItem("digital.signature");
+    credential.update(null);
 }
 
 export function loadCredential() {

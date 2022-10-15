@@ -2,29 +2,45 @@
   import UploadImage from "../lib/UploadImage.svelte";
   import * as ed from "@noble/ed25519";
   import { clearCredential, toHex } from "../libs/utils";
+  import { Col, Container, Row } from "sveltestrap";
+  import { credential } from '../libs/stores';
+  import { Button, Modal } from "sveltestrap";
+  import ShowSignatureModal from "../modals/ShowSignatureModal.svelte";
+  import DocumentSentModal from "../modals/DocumentSentModal.svelte";
+  import { PAGE_HOME, PAGE_SUBSCRIBE } from "../libs/constants";
+  import { page } from '../libs/stores';
 
-  export let credentials;
+  import {
+    Card,
+    CardBody,
+    CardFooter,
+    CardHeader,
+    CardSubtitle,
+    CardText,
+    CardTitle,
+  } from "sveltestrap";
+
   let image;
   let message;
+  let header;
 
   function deleteSignature() {
-    clearCredential()
-    location.reload();
+    clearCredential();
+    $page = PAGE_SUBSCRIBE;
   }
 
   async function signAndSend() {
-
     if (!image) {
       return;
     }
 
     let data = new Uint8Array(await readFile(image));
 
-    const signature = await ed.sign(data, credentials.privateKey.toUpperCase());
+    const signature = await ed.sign(data, $credential.privateKey.toUpperCase());
 
     const formData = new FormData();
     formData.append("document", image);
-    formData.append("publicKey", credentials.publicKey);
+    formData.append("publicKey", $credential.publicKey);
     formData.append("signature", toHex(signature));
 
     const response = await fetch("/api/v1/sign", {
@@ -34,9 +50,8 @@
 
     // TODO manage error
 
+    showDocumentSent = true;
     image = undefined;
-    message = "Documento inviato firmato con successo"
-
   }
 
   function readFile(file) {
@@ -50,29 +65,49 @@
       reader.readAsArrayBuffer(file);
     });
   }
+
+  let showSignature = false
+  let showDocumentSent = false;
+  
 </script>
 
-<form style="padding-top: 10px;">
-  <div class="mb-3">
-    <span class="badge rounded-pill bg-success"
-      >Firma Digitale Riconosciuta</span
-    >
-    <button class="btn btn-sm btn-primary" on:click={deleteSignature}>Elimina Firma</button>
-  </div>
-  <div class="mb-3">
-    <span class="badge rounded-pill bg-info text-dark"
-      >{credentials.publicKey.slice(0, 32)}</span
-    >
-  </div>
-  {#if message}
-  <div class="mb-3">
-    <span class="badge rounded-pill bg-warning text-dark"
-      >{message}</span
-    >
-  </div>
-  {/if}
-  <div class="mb-3 form-check">
-    <UploadImage bind:image={image} title="Da Firmare" />
-  </div>
-  <button disabled={!image} type="button" class="btn btn-primary" on:click={signAndSend}>Firma e Invia</button>
-</form>
+<ShowSignatureModal bind:isOpen={showSignature} ></ShowSignatureModal>
+
+<DocumentSentModal bind:isOpen={showDocumentSent}></DocumentSentModal>
+
+<Card class="mb-3">
+  <CardFooter>
+    <Row>
+      <Col xs="5" sm="5">La tua firma digitale:</Col>
+      <Col xs="5" sm="5">
+        <span on:click={() => { showSignature = true }} class="badge rounded-pill bg-info text-dark">
+          {$credential.publicKey.slice(0, 8)}
+        </span>
+      </Col>
+      <Col xs="2" sm="2">
+        <Button class="delete-signature" on:click={deleteSignature}><i class="bi bi-trash3" /></Button>
+      </Col>
+    </Row>
+  </CardFooter>
+</Card>
+
+<Card class="mb-3">
+  <CardHeader>
+    <CardTitle>Invia Documento</CardTitle>
+  </CardHeader>
+  <CardBody>
+    <CardSubtitle />
+    <CardText>
+      <UploadImage bind:image title={image ? '' : 'Carica Documento'} />
+    </CardText>
+    <div style="text-align: center">
+      <Button color="primary" disabled={!image} on:click={signAndSend}>Firma e Invia</Button>
+    </div>
+  </CardBody>
+</Card>
+
+<style>
+  :global(.delete-signature) {
+    background-color: red !important;
+  }
+</style>
