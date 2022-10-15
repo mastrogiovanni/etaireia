@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/mastrogiovanni/digital-signature-backend/internal/server/controllers"
+	"github.com/mastrogiovanni/etaireia/etaireia-backend/internal/server/controllers"
 )
 
 // NewRouter creates all the routes/endpoints, using Fizz.

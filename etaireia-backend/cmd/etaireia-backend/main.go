@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/mastrogiovanni/digital-signature-backend/internal/server"
+	"github.com/mastrogiovanni/etaireia/etaireia-backend/internal/server"
 )
 
 func main() {

@@ -33,7 +33,7 @@
         <NavLink href="#!" on:click={() => { $page = PAGE_RECEIVE; isOpen = false; }}>Ricevi</NavLink>
       </NavItem>
       <NavItem>
-        <NavLink href="https://github.com/mastrogiovanni/digital-signature">GitHub</NavLink>
+        <NavLink href="https://github.com/mastrogiovanni/etaireia">GitHub</NavLink>
       </NavItem>
     </Nav>
   </Collapse>

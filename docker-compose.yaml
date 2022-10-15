@@ -1,25 +1,25 @@
 version: '3.7'
 services:
 
-  ds-mongo:
+  etaireia-mongo:
     profiles: ["dev"]
     image: mongo:latest
     restart: always
     environment:
-      MONGO_INITDB_DATABASE: ${DATABASE_NAME}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: etaireia
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
-    # - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - mongodb_data_container:/data/db
     ports:
       - "27017:27017"
   
-  ds-traefik-prod:
+  etaireia-traefik-prod:
     profiles: ["prod"]
     image: "traefik:v2.6"
     command:
-      - "--providers.docker.constraints=Label(`mastrogiovanni.project`,`digital-dignature`)"
+      - "--providers.docker.constraints=Label(`docker.project`,`etaireia`)"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -28,7 +28,7 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--api.insecure=true"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=michele.mastrogiovanni@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "443:443/tcp"
@@ -38,7 +38,7 @@ services:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  ds-traefik-dev:
+  etaireia-traefik-dev:
     profiles: ["dev"]
     image: "traefik:v2.6"
     command:
@@ -54,12 +54,12 @@ services:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  ds-backend-prod:
+  etaireia-backend-prod:
     profiles: ["prod"]
     build:
-      context: ./digital-signature-backend
+      context: ./etaireia-backend
     labels:
-      - "mastrogiovanni.project=digital-dignature"
+      - "docker.project=etaireia"
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
@@ -75,35 +75,35 @@ services:
 
     restart: always
     depends_on: 
-      - ds-traefik-prod
+      - etaireia-traefik-prod
 
-  ds-backend-dev:
+  etaireia-backend-dev:
     profiles: ["dev"]
     build:
-      context: ./digital-signature-backend
+      context: ./etaireia-backend
     labels:
-      - "mastrogiovanni.project=digital-dignature"
+      - "docker.project=etaireia"
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api/`)"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
-      MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      MONGO_URL: mongodb://ds-mongo
+      MONGO_USERNAME: admin
+      MONGO_PASSWORD: admin
+      DATABASE_NAME: etaireia
+      MONGO_URL: mongodb://etaireia-mongo
     restart: always
     depends_on: 
-      - ds-mongo
-      - ds-traefik-dev
+      - etaireia-mongo
+      - etaireia-traefik-dev
 
-  ds-frontend-prod:
+  etaireia-frontend-prod:
     profiles: ["prod"]
     build:
-      context: ./digital-signature
+      context: ./etaireia-web
     labels:
-      - "mastrogiovanni.project=digital-dignature"
+      - "docker.project=etaireia"
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
@@ -115,14 +115,14 @@ services:
     restart: on-failure
     # command: node dist/index.js setup-api
     depends_on: 
-      - ds-traefik-prod
+      - etaireia-traefik-prod
 
-  ds-frontend-dev:
+  etaireia-frontend-dev:
     profiles: ["dev"]
     build:
-      context: ./digital-signature
+      context: ./etaireia-web
     labels:
-      - "mastrogiovanni.project=digital-dignature"
+      - "docker.project=etaireia"
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
@@ -132,8 +132,8 @@ services:
     restart: on-failure
     # command: node dist/index.js setup-api
     depends_on: 
-      - ds-mongo
-      - ds-traefik-dev
+      - etaireia-mongo
+      - etaireia-traefik-dev
 
 volumes:
   mongodb_data_container:

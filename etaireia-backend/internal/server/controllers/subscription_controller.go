@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mastrogiovanni/digital-signature-backend/internal/database"
-	"github.com/mastrogiovanni/digital-signature-backend/internal/server/models"
+	"github.com/mastrogiovanni/etaireia/etaireia-backend/internal/database"
+	"github.com/mastrogiovanni/etaireia/etaireia-backend/internal/server/models"
 )
 
 func CreateSubscription(c *gin.Context) {

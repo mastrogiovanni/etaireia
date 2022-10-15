@@ -16,7 +16,7 @@ COPY . .
 RUN go mod download
 RUN go mod verify
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /digital-signature-backend ./cmd/digital-signature-backend/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /etaireia-backend ./cmd/etaireia-backend/main.go
 
 FROM scratch
 
@@ -25,8 +25,8 @@ COPY --from=base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=base /etc/passwd /etc/passwd
 COPY --from=base /etc/group /etc/group
 
-COPY --from=base /digital-signature-backend .
+COPY --from=base /etaireia-backend .
 
 USER small-user:small-user
 
-CMD ["./digital-signature-backend"]
+CMD ["./etaireia-backend"]

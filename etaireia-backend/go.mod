@@ -1,4 +1,4 @@
-module github.com/mastrogiovanni/digital-signature-backend
+module github.com/mastrogiovanni/etaireia/etaireia-backend
 
 go 1.18
 

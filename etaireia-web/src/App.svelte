@@ -40,8 +40,6 @@
 
 <NavBar />
 
-Ciao
-
 <div class="container">
   {#if $page == PAGE_SUBSCRIBE}
     <GenerateKeysView {done} />
