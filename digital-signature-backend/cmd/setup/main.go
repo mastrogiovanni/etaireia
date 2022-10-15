@@ -69,6 +69,15 @@ func createSubscription(url string) (ed25519.PublicKey, ed25519.PrivateKey) {
 	if err != nil {
 		panic(err)
 	}
+	defer res.Body.Close()
+
+	bodyBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bodyString := string(bodyBytes)
+
+	log.Printf("Response: %s\n", bodyString)
 
 	// Check the response
 	if res.StatusCode != http.StatusOK {
@@ -111,9 +120,9 @@ func approveSubscription(url string, publicKey ed25519.PublicKey) {
 
 func main() {
 
-	publicKey, _ := createSubscription("http://192.168.0.184:3000/api/v1/subscription")
+	publicKey, _ := createSubscription("https://digital-signature.mastrogiovanni.cloud/api/v1/subscription")
 
-	approveSubscription("http://192.168.0.184:3000/api/v1/subscription/approve", publicKey)
+	approveSubscription("https://digital-signature.mastrogiovanni.cloud/api/v1/subscription/approve", publicKey)
 
 	// signature := ed25519.Sign(privateKey, document)
 

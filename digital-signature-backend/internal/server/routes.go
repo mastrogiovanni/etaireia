@@ -16,6 +16,7 @@ func NewRouter() (*gin.Engine, error) {
 	engine.GET("/health", controllers.Healthcheck)
 
 	engine.POST("/api/v1/sign", controllers.SignController)
+	engine.GET("/api/v1/sign/:publicKey", controllers.ListSigned)
 
 	engine.POST("/api/v1/subscription", controllers.CreateSubscription)
 	engine.GET("/api/v1/subscription", controllers.ListSubscription)

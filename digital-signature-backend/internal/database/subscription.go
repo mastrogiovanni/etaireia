@@ -39,6 +39,11 @@ type FindByPublicKeyQuery struct {
 
 func CreateSubscription(subscription *Subscription) error {
 
+	log.Println(os.Getenv("MONGO_USERNAME"))
+	log.Println(os.Getenv("MONGO_PASSWORD"))
+	log.Println(os.Getenv("MONGO_URL"))
+	log.Println(os.Getenv("DATABASE_NAME"))
+
 	subscription.Status = Requested
 	subscription.Approver = nil
 
@@ -193,7 +198,7 @@ func FindSubscriptionByPublicKey(publicKey string) (*Subscription, error) {
 		}
 	}()
 
-	collection := client.Database(os.Getenv("DATABASE_NAME")).Collection("identity")
+	collection := client.Database(os.Getenv("DATABASE_NAME")).Collection("subscription")
 
 	result := collection.FindOne(ctx, FindByPublicKeyQuery{PublicKey: publicKey})
 

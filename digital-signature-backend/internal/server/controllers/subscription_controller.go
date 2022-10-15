@@ -44,6 +44,8 @@ func CreateSubscription(c *gin.Context) {
 		return
 	}
 
+	log.Printf("Subscription saved: Name: '%s', Surname: '%s', Public Key: '%s'\n", createSubscriptionRequest.Name, createSubscriptionRequest.Surname, createSubscriptionRequest.PublicKey)
+
 	models.ResponseSuccess(c)
 
 }

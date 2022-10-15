@@ -80,3 +80,19 @@ func SignController(c *gin.Context) {
 	models.ResponseSuccess(c)
 
 }
+
+func ListSigned(c *gin.Context) {
+
+	publicKey := c.Param("publicKey")
+
+	log.Println("Search for", publicKey)
+
+	signeds, err := database.FindSignedByPublicKey(publicKey)
+	if err != nil {
+		models.ResponseError(c, err)
+		return
+	}
+
+	models.ResponseSuccessWithData(c, signeds)
+
+}
