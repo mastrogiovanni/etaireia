@@ -16,5 +16,20 @@ POST /api/v1/subscription { document, name, surname, publicKey, signature } ->
     - signature need to be created from document and privateKey for that publicKey
     - name and surname not null
 
+POST /api/v1/request { title, description, document, publicKey } ->
+    Create a request to sign a document. This API need to be protected agains unauthorized use.
+
+POST /api/v1/tosign { nonce, publicKey, signature } ->
+    Return list of documents that need to be signed
+    - id
+    - title
+    - description
+
+POST /api/v1/document { nonce, publicKey, signature, id } ->
+    Return the document to sign
+
+
+
+
 
 

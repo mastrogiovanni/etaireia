@@ -1,0 +1,48 @@
+<informCreditor id="signedData" xmlns="urn:czech-ba:instant-payments:v1:instantPayment">
+    <xid>X9999000000000001</xid>
+    <transactionStatus>
+        <statusCode>IN_DELIVERY</statusCode>
+    </transactionStatus>
+    <CdtTrfTxInf xmlns="urn:czech-ba:instant-payments:v1:derivedpacs.008.001.02">
+        <PmtId>
+            <TxId>20200101 0000000001</TxId>
+        </PmtId>
+        <InstdAmt Ccy="CZK">1.01</InstdAmt>
+        <Dbtr>
+            <Nm>Koláček Tvarohový</Nm>
+        </Dbtr>
+        <DbtrAcct>
+            <Id>
+                <IBAN>CZ7130300000001000043013</IBAN>
+            </Id>
+        </DbtrAcct>
+        <CdtrAcct>
+            <Id>
+                <IBAN>CZ1360000000000000000019</IBAN>
+            </Id>
+        </CdtrAcct>
+        <RmtInf>
+            <Ustrd>
+                TentoTextZprávyProPříjemceJeVyplněnNaMaximálníMožnouDélkuSloužíKpřípadnéIdentifikaciChybVTestováníZároveňJeKontrolovánaDiakritikaVýpisů</Ustrd>
+            <Strd>
+                <CdtrRefInf>
+                    <Ref>VS:7777777777</Ref>
+                </CdtrRefInf>
+            </Strd>
+            <Strd>
+                <CdtrRefInf>
+                    <Ref>KS:0308</Ref>
+                </CdtrRefInf>
+            </Strd>
+            <Strd>
+                <CdtrRefInf>
+                    <Ref>SS:2222222222</Ref>
+                </CdtrRefInf>
+            </Strd>
+        </RmtInf>
+    </CdtTrfTxInf>
+    <timestamps>
+        <T2>2020-01-01T00:00:00+01:00</T2>
+        <TR>2020-01-01T00:00:00+01:00</TR>
+    </timestamps>
+</informCreditor>

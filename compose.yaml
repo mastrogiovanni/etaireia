@@ -2,7 +2,6 @@ version: '3.7'
 services:
 
   etaireia-mongo:
-    profiles: ["dev"]
     image: mongo:latest
     restart: always
     environment:
@@ -61,21 +60,20 @@ services:
     labels:
       - "docker.project=etaireia"
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.tls=true"
-      - "traefik.http.routers.backend.tls.certresolver=myresolver"
-      - "traefik.http.routers.backend.rule=Host(`${NODE_HOST}`) && PathPrefix(`/api/`)"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend-prod.entrypoints=websecure"
+      - "traefik.http.routers.backend-prod.tls=true"
+      - "traefik.http.routers.backend-prod.tls.certresolver=myresolver"
+      - "traefik.http.routers.backend-prod.rule=Host(`${NODE_HOST}`) && PathPrefix(`/api/`)"
+      - "traefik.http.services.backend-prod.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       DATABASE_NAME: ${DATABASE_NAME}
       MONGO_URL: ${MONGO_URL}
-
     restart: always
     depends_on: 
-      - etaireia-traefik-prod
+      - etaireia-mongo
 
   etaireia-backend-dev:
     profiles: ["dev"]
@@ -84,9 +82,9 @@ services:
     labels:
       - "docker.project=etaireia"
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api/`)"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend-dev.entrypoints=web"
+      - "traefik.http.routers.backend-dev.rule=PathPrefix(`/api/`)"
+      - "traefik.http.services.backend-dev.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
       MONGO_USERNAME: admin
@@ -96,44 +94,38 @@ services:
     restart: always
     depends_on: 
       - etaireia-mongo
-      - etaireia-traefik-dev
 
   etaireia-frontend-prod:
     profiles: ["prod"]
     build:
-      context: ./etaireia-web
+      context: ./etaireia
     labels:
       - "docker.project=etaireia"
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
-      - "traefik.http.routers.frontend.rule=Host(`${NODE_HOST}`) && PathPrefix(`/`)"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend-prod.entrypoints=websecure"
+      - "traefik.http.routers.frontend-prod.tls=true"
+      - "traefik.http.routers.frontend-prod.tls.certresolver=myresolver"
+      - "traefik.http.routers.frontend-prod.rule=Host(`${NODE_HOST}`) && PathPrefix(`/`)"
+      - "traefik.http.services.frontend-prod.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
     restart: on-failure
     # command: node dist/index.js setup-api
-    depends_on: 
-      - etaireia-traefik-prod
 
   etaireia-frontend-dev:
     profiles: ["dev"]
     build:
-      context: ./etaireia-web
+      context: ./etaireia
     labels:
       - "docker.project=etaireia"
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend-dev.entrypoints=web"
+      - "traefik.http.routers.frontend-dev.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend-dev.loadbalancer.server.port=3000"
     environment:
       PORT: 3000
     restart: on-failure
     # command: node dist/index.js setup-api
-    depends_on: 
-      - etaireia-mongo
-      - etaireia-traefik-dev
 
 volumes:
   mongodb_data_container:
