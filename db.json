@@ -1,0 +1,37 @@
+{
+    "documents": [
+		{
+            "id": 0,
+			"title": "Modulo Adesione Cerchi D'Onda",
+			"description": "Modulo per parte dell'associazione Cerchi D'Onda.",
+			"img": "/imgs/iscrizione.jpg",
+			"documentUrl": "/docs/note.pdf",
+			"info": {
+				"name": "Ulteriori Info",
+				"href": "https://apple.com"
+			}
+		},
+		{
+            "id": 1,
+			"title": "Modulo Iscrizione SFAF 2024",
+			"description": "Modulo per l'iscrizione alla SFAF: questo modulo è richiesto per far parte dell'associazione Cerchi D'Onda e da diritto alla copertura assicurativa per event associativi che verrà stipulata.",
+			"img": "/imgs/sfaf.png",
+			"documentUrl": "/docs/note.pdf",
+			"info": {
+				"name": "Per saperne di più",
+				"href": "https://apple.com"
+			}
+		}
+    ],
+	"contacts": [
+		{ "alt": "Don Mario Oscar Llanos", "ruolo": "Presidente", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/don-mario-4-288x300.jpeg" },
+		{ "alt": "Loredana Simeone", "ruolo": "Vicepresidente", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/loredana-simeone-288x300.jpg" },
+		{ "alt": "Ruggiero Diella", "ruolo": "Consigliere", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/ruggiero-diella-288x300.jpg" },
+		{ "alt": "Domenico Langella", "ruolo": "Tesoriere", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/domenico-langella-288x300.jpg" },
+		{ "alt": "Marcella Greco", "ruolo": "Consigliere", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/marcella-greco-3-288x300.jpeg" },
+        { "alt": "Alessandro Malatesta", "ruolo": "Consigliere", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/alessandro-malatesta-288x300.jpg" },
+        { "alt": "Eduardo Mario Costantino", "ruolo": "Consigliere", "src": "https://www.cerchidonda.org/wp-content/uploads/2022/08/Progetto-senza-titolo-8.png" },
+        { "alt": "Venanzio Germinario", "ruolo": "Consigliere", "src": "https://www.cerchidonda.org/wp-content/uploads/2022/08/Progetto-senza-titolo-7.png" },
+        { "alt": "Roberta Silvestri", "ruolo": "Segretaria", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/roberta-silvestri-288x300.jpg" }
+	]
+}

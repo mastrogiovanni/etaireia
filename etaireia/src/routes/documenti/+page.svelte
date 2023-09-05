@@ -60,7 +60,7 @@
 	}
 
 	onMount(async () => {
-		let resp = await fetch("http://localhost:5000/documents")
+		let resp = await fetch("/api/v1/documents")
 		documenti = await resp.json()
 	})
 
