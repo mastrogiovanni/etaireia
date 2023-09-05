@@ -1,25 +1,6 @@
-service:
+services:
 
-  etaireia-frontend-prod:
-    profiles: ["prod"]
-    build:
-      context: ./etaireia
-    labels:
-      - "docker.project=etaireia"
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend-prod.entrypoints=websecure"
-      - "traefik.http.routers.frontend-prod.tls=true"
-      - "traefik.http.routers.frontend-prod.tls.certresolver=myresolver"
-      - "traefik.http.routers.frontend-prod.rule=Host(`${NODE_HOST}`) && PathPrefix(`/`)"
-      - "traefik.http.services.frontend-prod.loadbalancer.server.port=3000"
-    environment:
-      PORT: 3000
-    restart: on-failure
-    # command: node dist/index.js setup-api
-
-  etaireia-traefik-prod:
-    profiles: ["prod"]
-    image: "traefik:v2.6"
+  traefik:
     command:
       - "--providers.docker.constraints=Label(`docker.project`,`etaireia`)"
       - "--providers.docker=true"
@@ -34,30 +15,19 @@ service:
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "443:443/tcp"
-      - "8080:8080"
-    restart: always
     volumes:
       - "./letsencrypt:/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  backend:
-    profiles: ["prod"]
-    build:
-      context: ./etaireia-backend
+  frontend:
     labels:
-      - "docker.project=etaireia"
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend-prod.entrypoints=websecure"
-      - "traefik.http.routers.backend-prod.tls=true"
-      - "traefik.http.routers.backend-prod.tls.certresolver=myresolver"
-      - "traefik.http.routers.backend-prod.rule=Host(`${NODE_HOST}`) && PathPrefix(`/api/`)"
-      - "traefik.http.services.backend-prod.loadbalancer.server.port=3000"
-    environment:
-      PORT: 3000
-      MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      MONGO_URL: ${MONGO_URL}
-    restart: always
-    depends_on: 
-      - etaireia-mongo
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.routers.frontend.rule=Host(`${NODE_HOST}`) && PathPrefix(`/`)"
+
+  json-server:
+      labels:
+        - "traefik.http.routers.json-server.entrypoints=websecure"
+        - "traefik.http.routers.json-server.tls=true"
+        - "traefik.http.routers.json-server.tls.certresolver=myresolver"
+        - "traefik.http.routers.json-server.rule=Host(`${NODE_HOST}`) && PathPrefix(`/api/v1`)"

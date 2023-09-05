@@ -1,15 +1,14 @@
-version: '3.7'
 services:
 
   mongo:
     image: mongo:latest
     restart: on-failure
     environment:
-      MONGO_INITDB_DATABASE: etaireia
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./data/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - mongodb_data_container:/data/db
     ports:
       - "27017:27017"
@@ -26,7 +25,6 @@ services:
       - "80:80/tcp"
       - "8080:8080"
     volumes:
-      - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   frontend:
@@ -53,7 +51,7 @@ services:
       - "traefik.http.services.json-server.loadbalancer.server.port=80"
       - "traefik.http.middlewares.json-server.stripprefix.prefixes=/api/v1"
     volumes:
-      - ./db.json:/data/db.json 
+      - ./data/db.json:/data/db.json 
 
   # backend:
   #   build:
@@ -66,9 +64,9 @@ services:
   #     - "traefik.http.services.backend-dev.loadbalancer.server.port=3000"
   #   environment:
   #     PORT: 3000
-  #     MONGO_USERNAME: admin
-  #     MONGO_PASSWORD: admin
-  #     DATABASE_NAME: etaireia
+  #     MONGO_USERNAME: ${MONGO_USERNAME}
+  #     MONGO_PASSWORD: ${MONGO_PASSWORD}
+  #     DATABASE_NAME: ${DATABASE_NAME}
   #     MONGO_URL: mongodb://etaireia-mongo
   #   restart: always
   #   depends_on: 

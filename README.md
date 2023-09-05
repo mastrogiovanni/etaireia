@@ -1,9 +1,11 @@
 # Etaireia - a simple solution for Digital Signature for NPO, caritative organization and small companies. 
 
-Etaireia is a software to allow to sign documents via mobile app and desktop leveraging a central point where documents are stored, and keps secure with 
-minimal maintenance effort.
+Etaireia is a software to allow to sign documents via mobile app and desktop leveraging 
+a central point where documents are stored, and keps secure with minimal maintenance effort.
 
-Everything is work in progress. We will update this document a lot of times in this stage.
+Everything is work in progress. 
+
+We will update this document a lot of times in this stage.
 
 ## Development Guidelines
 
