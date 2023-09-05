@@ -8,7 +8,6 @@
     export let href = ""
 
     export let show = () => {}
-    export let sign = () => {}
 
 </script>
 
@@ -21,7 +20,6 @@
 	</p>
 	<div class="mb-3 flex mt-4 space-x-3 lg:mt-6">
 		<Button on:click={show} color="blue">Visualizza</Button>
-		<Button on:click={sign} color="green" class="dark:text-white">Firma</Button>
 	</div>
 	{#if href}
 	<a href={href} class="inline-flex items-center text-primary-600 hover:underline">

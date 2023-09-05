@@ -2,7 +2,7 @@
 	"company": {
 		"name": "Cerchi D'Onda"
 	},
-    "documents": [
+    "waiting": [
 		{
             "id": 0,
 			"title": "Modulo Adesione Cerchi D'Onda",
@@ -26,6 +26,36 @@
 			}
 		}
     ],
+	"documents": [
+		{
+            "id": 0,
+			"title": "Modulo Adesione Cerchi D'Onda",
+			"description": "Modulo per parte dell'associazione Cerchi D'Onda.",
+			"img": "/imgs/iscrizione.jpg",
+			"documentUrl": "/docs/note.pdf",
+			"info": {
+				"name": "Ulteriori Info",
+				"href": "https://apple.com"
+			},
+			"status": "signed",
+			"created": "05/05/2023",
+			"signed": "05/09/2023"
+		},
+		{
+            "id": 1,
+			"title": "Modulo Iscrizione SFAF 2024",
+			"description": "Modulo per l'iscrizione alla SFAF: questo modulo è richiesto per far parte dell'associazione Cerchi D'Onda e da diritto alla copertura assicurativa per event associativi che verrà stipulata.",
+			"img": "/imgs/sfaf.png",
+			"documentUrl": "/docs/note.pdf",
+			"info": {
+				"name": "Per saperne di più",
+				"href": "https://apple.com"
+			},
+			"status": "waiting",
+			"created": "05/05/2023",
+			"signed": ""
+		}
+ 	],
 	"contacts": [
 		{ "alt": "Don Mario Oscar Llanos", "ruolo": "Presidente", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/don-mario-4-288x300.jpeg" },
 		{ "alt": "Loredana Simeone", "ruolo": "Vicepresidente", "src": "https://www.cerchidonda.org/wp-content/uploads/2020/06/loredana-simeone-288x300.jpg" },

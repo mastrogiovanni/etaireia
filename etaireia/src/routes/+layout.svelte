@@ -9,6 +9,7 @@
 	import { page } from '$app/stores';
 	import { Badge } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
+	import { baseUrl } from '$lib/constants';
 
 	$: activeUrl = $page.url.pathname;
 	let activeClass = 'text-white bg-green-700 md:bg-transparent md:text-green-700 md:dark:text-white dark:bg-green-600 md:dark:bg-transparent';
@@ -17,7 +18,7 @@
 	let company: {name: string} = { name: "-" }
 
 	onMount(async () => {
-		let resp = await fetch("/api/v1/company")
+		let resp = await fetch(baseUrl + "/api/v1/company")
 		company = await resp.json()
 	})
 

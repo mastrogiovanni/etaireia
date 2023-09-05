@@ -1,53 +1,24 @@
 <script lang="ts">
 
-	import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Checkbox, TableSearch, TabItem, Tabs, Modal } from 'flowbite-svelte';
-  	import { Card, Button } from 'flowbite-svelte';
-  	import { Icon } from 'flowbite-svelte-icons';
-	import { Drawer, CloseButton, A } from 'flowbite-svelte';
-	import { sineIn } from 'svelte/easing';
-	import { Listgroup, ListgroupItem } from 'flowbite-svelte';
+	import { Button, TabItem, Tabs, Modal } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import { loadCredentials } from '$lib/credential';
-	import { Label, Select } from 'flowbite-svelte';
-	import PdfViewer from 'svelte-pdf';
 	import DrawerSign from '../../components/DrawerSign.svelte';
 	import CardToSign from '../../components/CardToSign.svelte';
 	import DrawerDocument from '../../components/DrawerDocument.svelte';
+	import CardToView from '../../components/CardToView.svelte';
+	import { baseUrl } from '$lib/constants';
 
 	let selectedDocument: any;
 
-	let documenti: any[] = [
-		{
-			title: "Modulo Adesione Cerchi D'Onda",
-			description: `Modulo per parte dell'associazione Cerchi D'Onda.`,
-			img: "/imgs/iscrizione.jpg",
-			documentUrl: "/docs/note.pdf",
-			info: {
-				name: "Ulteriori Info",
-				href: "https://apple.com"
-			}
-		},
-		{
-			title: "Modulo Iscrizione SFAF 2024",
-			description: `
-				Modulo per l'iscrizione alla SFAF: questo modulo è richiesto per far parte dell'associazione
-				Cerchi D'Onda e da diritto alla copertura assicurativa per event associativi che verrà
-				stipulata.`,
-			img: "/imgs/sfaf.png",
-			documentUrl: "/docs/note.pdf",
-			info: {
-				name: "Per saperne di più",
-				href: "https://apple.com"
-			}
-		}
-	]
+	let allDocuments: any[] = []
+	let documenti: any[] = []
 
 	let hideSignDrawer = true
 	let hideDocumentDrawer = true
 	let signedModal = false;
 
 	function show(document: any) {
-		console.log("Show")
+		console.log("Show", document)
 		selectedDocument = document
 		hideSignDrawer = true
 		hideDocumentDrawer = false
@@ -60,8 +31,11 @@
 	}
 
 	onMount(async () => {
-		let resp = await fetch("/api/v1/documents")
+		let resp = await fetch(baseUrl + "/api/v1/waiting")
 		documenti = await resp.json()
+
+		resp = await fetch(baseUrl + "/api/v1/documents")
+		allDocuments = await resp.json()
 	})
 
 	async function signSent(publicKey: string) {
@@ -116,7 +90,17 @@
 	</TabItem>
 
 	<TabItem title="Tutti">
-		Mostra qui tutti i documenti firmati e non
+		
+		{#each allDocuments as documento}
+		<CardToView 
+			title={documento.title}
+			description={documento.description}
+			img={documento.img}
+			href={documento.href} 
+			show={() => show(documento)}
+		/>
+	{/each}
+
 	</TabItem>
 
 </Tabs>
