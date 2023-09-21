@@ -38,5 +38,14 @@ d) è collegata ai dati sottoscritti in modo da consentire l’identificazione d
 Artcolo 55 pagina 14
 https://www.agid.gov.it/sites/default/files/repository_files/leggi_decreti_direttive/dpcm_22_febbraio_2013_-_nuove_regole_tecniche.pdf
 
-Identificare l'utente
-Conservare 20 anni
+* Identificare l'utente
+* Conservare 20 anni
+
+* si dotano di una copertura assicurativa per la responsabilità civile rilasciata da una società
+di assicurazione abilitata ad esercitare nel campo dei rischi industriali per un ammontare non inferiore ad euro
+cinquecentomila.
+
+# Google Merge
+
+https://developers.google.com/docs/api/how-tos/merge
+
