@@ -37,7 +37,7 @@ func initiateRequest() (string, error) {
 
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
-	req.Header.Add("authorization", "Bearer VkUHKCQoeBSfiitPHrid7SA0agliHFkv")
+	req.Header.Add("authorization", "Bearer ")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -113,7 +113,7 @@ func uploadDocument(fileName string, idRequest string) (string, error) {
 
 	req.Header.Add("accept", "application/json")
 	req.Header.Set("content-type", w.FormDataContentType())
-	req.Header.Add("authorization", "Bearer VkUHKCQoeBSfiitPHrid7SA0agliHFkv")
+	req.Header.Add("authorization", "Bearer ")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -174,7 +174,7 @@ func addSigner(idRequest string, idDocument string) (string, error) {
 
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
-	req.Header.Add("authorization", "Bearer VkUHKCQoeBSfiitPHrid7SA0agliHFkv")
+	req.Header.Add("authorization", "Bearer ")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -211,7 +211,7 @@ func activate(idRequest string) {
 	req, _ := http.NewRequest("POST", url, nil)
 
 	req.Header.Add("accept", "application/json")
-	req.Header.Add("authorization", "Bearer VkUHKCQoeBSfiitPHrid7SA0agliHFkv")
+	req.Header.Add("authorization", "Bearer ")
 
 	res, _ := http.DefaultClient.Do(req)
 

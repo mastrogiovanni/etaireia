@@ -14,7 +14,7 @@ func main() {
 	resource := "/messages/http/send"
 
 	params := url.Values{}
-	params.Add("apiKey", "P6jRLPAZSxSLf0MpvG9onA==")
+	params.Add("apiKey", "")
 	params.Add("to", "+393493147800")
 	params.Add("content", "Ciao Michele come stai?")
 
