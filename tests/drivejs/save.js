@@ -14,15 +14,15 @@ const SCOPES = ['https://www.googleapis.com/auth/drive'];
  * @return {Promise<OAuth2Client|null>}
  */
 async function loadSavedCredentialsIfExist() {
-    // try {
+    try {
         console.log(TOKEN_PATH)
         const content = fs.readFileSync(TOKEN_PATH);
         const credentials = JSON.parse(content);
         return google.auth.fromJSON(credentials);
-    // } catch (err) {
-    //     console.log("Error:" + err)
-    //     return null;
-    // }
+    } catch (err) {
+        console.log("Error:" + err)
+        return null;
+    }
 }
 
 async function authorize() {

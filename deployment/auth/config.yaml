@@ -1,0 +1,34 @@
+# The base path of dex and the external name of the OpenID Connect service.
+#
+# This is the canonical URL that all clients MUST use to refer to dex. If a
+# path is provided, dex's HTTP service will listen at a non-root URL.
+issuer: https://dex.mastrogiovanni.cloud
+
+storage:
+  type: sqlite3
+  config:
+    file: /var/dex/dex.db
+
+web:
+  http: 0.0.0.0:5556
+
+oauth2:
+  skipApprovalScreen: false
+
+staticClients:
+- id: foo
+  redirectURIs:
+  - 'https://auth.mastrogiovanni.cloud/_oauth'
+  - 'https://etaireia.mastrogiovanni.cloud'
+  name: 'mastrogiovanni.cloud'
+  secret: bar
+
+enablePasswordDB: true
+
+staticPasswords:
+- email: "admin@example.com"
+  # bcrypt hash of the string "password"
+  hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+  username: "admin"
+  userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+

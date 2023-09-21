@@ -14,7 +14,7 @@ import (
 
 func initiateRequest() (string, error) {
 
-	url := "https://dev.yousign.io/api_public/v3/signature_requests"
+	url := "https://api-sandbox.yousign.app/v3/signature_requests"
 
 	payload := strings.NewReader(`
 	{
@@ -107,7 +107,7 @@ func uploadDocument(fileName string, idRequest string) (string, error) {
 	// If you don't close it, your request will be missing the terminating boundary.
 	w.Close()
 
-	url := fmt.Sprintf("https://dev.yousign.io/api_public/v3/signature_requests/%s/documents", idRequest)
+	url := fmt.Sprintf("https://api-sandbox.yousign.app/v3/signature_requests/%s/documents", idRequest)
 
 	req, _ := http.NewRequest("POST", url, &b)
 
@@ -142,7 +142,7 @@ func uploadDocument(fileName string, idRequest string) (string, error) {
 
 func addSigner(idRequest string, idDocument string) (string, error) {
 
-	url := fmt.Sprintf("https://dev.yousign.io/api_public/v3/signature_requests/%s/signers", idRequest)
+	url := fmt.Sprintf("https://api-sandbox.yousign.app/v3/signature_requests/%s/signers", idRequest)
 
 	payload := strings.NewReader(fmt.Sprintf(`
 	{
@@ -206,7 +206,7 @@ func addSigner(idRequest string, idDocument string) (string, error) {
 
 func activate(idRequest string) {
 
-	url := fmt.Sprintf("https://dev.yousign.io/api_public/v3/signature_requests/%s/activate", idRequest)
+	url := fmt.Sprintf("https://api-sandbox.yousign.app/v3/signature_requests/%s/activate", idRequest)
 
 	req, _ := http.NewRequest("POST", url, nil)
 
@@ -223,19 +223,19 @@ func activate(idRequest string) {
 }
 
 func main() {
-	// idRequest, err := initiateRequest()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println("Request ID: " + idRequest)
-	// idDocument, err := uploadDocument("/home/michele/test.pdf", idRequest)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println("Document ID: " + idDocument)
+	idRequest, err := initiateRequest()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Request ID: " + idRequest)
+	idDocument, err := uploadDocument("/home/michele/test.pdf", idRequest)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Document ID: " + idDocument)
 
-	idRequest := "3cd06e45-ded8-47e5-8229-b99b7ccb1b22"
-	idDocument := "36f194cf-bd89-4ad9-9d72-db8ca5f36536"
+	// idRequest := "3cd06e45-ded8-47e5-8229-b99b7ccb1b22"
+	// idDocument := "36f194cf-bd89-4ad9-9d72-db8ca5f36536"
 
 	idSigner, err := addSigner(idRequest, idDocument)
 	if err != nil {

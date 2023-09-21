@@ -1,0 +1,104 @@
+services:
+
+  load-balancer:
+    image: "traefik:v2.9"
+    restart: always
+    command:
+      - "--log.level=DEBUG"
+      - "--providers.docker.constraints=Label(`docker.project`, `elerian`)"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=michele.mastrogiovanni@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--experimental.plugins.mapheaders.modulename=github.com/fdufault/mapheaders"
+      - "--experimental.plugins.mapheaders.version=v0.0.7"
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "8080:8080/tcp"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+    # labels:
+    #  - "traefik.http.routers.api.entryPoints=traefik"
+    #  - "traefik.http.routers.api.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+    #  - "traefik.http.routers.api.service=api@internal"
+    #  - "traefik.http.routers.api.middlewares=api-auth"
+    # echo $(htpasswd -nB michele.mastrogiovanni@gmail.com) | sed -e s/\\$/\\$\\$/g
+    #  - "traefik.http.middlewares.api-auth.basicauth.users=michele.mastrogiovanni@gmail.com:$$2y$$05$$FYl85XcjF1P9dy3lQ/qhAe7gWRngAbTCIZOpgB/kkLxD3IYAABtPO"
+    # depends_on:
+    #   - traefik-forward-auth
+
+  dex:
+    image: dexidp/dex
+    volumes:
+      - /etc/localtime:/etc/localtime:ro    
+      - ./auth/config.yaml:/config.yml:ro
+    command: ['dex', 'serve','/config.yml']
+    restart: always
+    labels:
+    - "docker.project=elerian"
+    - "traefik.enable=true"
+    - "traefik.http.routers.dex.tls=true"
+    - "traefik.http.routers.dex.tls.certresolver=myresolver"
+    - "traefik.http.routers.dex.rule=Host(`dex.mastrogiovanni.cloud`)"
+    - "traefik.http.routers.dex.entrypoints=websecure"
+    - "traefik.http.services.dex.loadbalancer.server.port=5556"
+
+  traefik-forward-auth:
+    image: thomseddon/traefik-forward-auth:2.2.0
+    env_file: ./auth/traefik-forward-auth.env
+    restart: always
+    labels:
+    - "docker.project=elerian"
+    - "traefik.enable=true"
+    - "traefik.http.routers.auth.tls=true"
+    - "traefik.http.routers.auth.tls.certresolver=myresolver"
+    - "traefik.http.routers.auth.rule=Host(`auth.mastrogiovanni.cloud`)"
+    - "traefik.http.routers.auth.entrypoints=websecure"
+    - "traefik.http.services.auth.loadbalancer.server.port=4181"
+    #- "traefik.http.routers.auth.tls.domains[0].main=elerianai.com"
+    #- "traefik.http.routers.auth.tls.domains[0].sans=*.elerianai.com"        
+    - "traefik.http.routers.auth.service=auth@docker"
+    - "traefik.http.middlewares.forward-auth.forwardauth.address=http://traefik-forward-auth:4181"
+    - "traefik.http.middlewares.forward-auth.forwardauth.trustForwardHeader=true"
+    - "traefik.http.middlewares.forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User"
+    - "traefik.http.routers.auth.middlewares=forward-auth"
+
+  site:
+    # image: nginx:1.23.4
+    image: node:18
+    restart: always
+    command:
+      - "/bin/bash"
+      - "-c"
+      - "cd /app && npm run dev"
+    volumes:
+      # - "./page:/usr/share/nginx/html:ro"
+      - "./test:/app"
+    labels:
+      - "dev-kit.provided=true"
+      - "docker.project=elerian"
+      - "traefik.enable=true"
+      - "traefik.http.services.site.loadbalancer.server.port=5173"
+      - "traefik.http.routers.site.entrypoints=websecure"
+      - "traefik.http.routers.site.tls=true"
+      - "traefik.http.routers.site.tls.certresolver=myresolver"
+      - "traefik.http.routers.site.rule=Host(`etaireia.mastrogiovanni.cloud`) && PathPrefix(`/`)"
+      - "traefik.http.routers.site.middlewares=secured"
+      - "traefik.http.middlewares.secured.chain.middlewares=forward-auth,transform-header,add-group"
+      - "traefik.http.middlewares.transform-header.plugin.mapheaders.fromheader=X-Forwarded-User"
+      - "traefik.http.middlewares.transform-header.plugin.mapheaders.toheader=IV-User"
+      - "traefik.http.middlewares.add-group.headers.customrequestheaders.IV-Groups=\"test\""
+
+networks:
+  elerian-network:
+    driver: bridge
+    name: etaireia-network
