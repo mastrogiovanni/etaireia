@@ -1,44 +1,64 @@
 services:
-
-  mongo:
-    image: mongo:latest
-    restart: on-failure
-    environment:
-      MONGO_INITDB_DATABASE: ${DATABASE_NAME}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - ./data/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-      - mongodb_data_container:/data/db
-    ports:
-      - "27017:27017"
   
   traefik:
-    image: "traefik:v2.6"
+    image: "traefik:v2.10.4"
     restart: on-failure
     command:
+      - "--log.level=INFO"
+      - "--providers.docker.constraints=Label(`docker.project`, `etaireia`)"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--api.insecure=true"
+      - "--api.dashboard=true"
     ports:
       - "80:80/tcp"
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+     - "traefik.http.routers.traefik.entryPoints=traefik"
+     - "traefik.http.routers.traefik.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+     - "traefik.http.routers.traefik.service=api@internal"
+     # - "traefik.http.routers.traefik.middlewares=traefik-auth"
+     # echo $(htpasswd -nB michele.mastrogiovanni@gmail.com) | sed -e s/\\$/\\$\\$/g
+     # - "traefik.http.middlewares.traefik-auth.basicauth.users=michele.mastrogiovanni@gmail.com:$$2y$$05$$FYl85XcjF1P9dy3lQ/qhAe7gWRngAbTCIZOpgB/kkLxD3IYAABtPO"
 
-  frontend:
-    build:
-      context: ./etaireia
+  signer:
+    image: node:20
     restart: on-failure
+    command:
+      - /bin/bash
+      - -c 
+      - "cd /app && npm run dev"
     environment:
       PORT: 3000
+    volumes:
+      - ./ui/signer:/app
     labels:
       - "docker.project=etaireia"
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend-dev.entrypoints=web"
-      - "traefik.http.routers.frontend-dev.rule=PathPrefix(`/`)"
-      - "traefik.http.services.frontend-dev.loadbalancer.server.port=3000"
+      - "traefik.http.routers.signer.entrypoints=web"
+      - "traefik.http.routers.signer.rule=PathPrefix(`/signer`)"
+      - "traefik.http.services.signer.loadbalancer.server.port=3000"
+
+  approval:
+    image: node:20
+    restart: on-failure
+    command:
+      - /bin/bash
+      - -c 
+      - "cd /app && npm run dev"
+    environment:
+      PORT: 3000
+    volumes:
+      - ./ui/approval:/app
+    labels:
+      - "docker.project=etaireia"
+      - "traefik.enable=true"
+      - "traefik.http.routers.approval.entrypoints=web"
+      - "traefik.http.routers.approval.rule=PathPrefix(`/approval`)"
+      - "traefik.http.services.approval.loadbalancer.server.port=3000"
 
   json-server:
     image: clue/json-server
@@ -52,6 +72,23 @@ services:
       - "traefik.http.middlewares.json-server.stripprefix.prefixes=/api/v1"
     volumes:
       - ./data/db.json:/data/db.json 
+
+  # vault:
+  #   image: hashicorp/vault
+  #   volumes:
+  #   - ./data/vault-file:/vault/file:rw
+  #   - ./data/vault:/vault/config:rw
+  #   command:
+  #   - server
+  #   cap_add:
+  #   - IPC_LOCK
+  #   labels:
+  #   - "dev-kit.provided=true"
+  #   - "docker.project=etaireia"
+  #   - "traefik.enable=true"
+  #   - "traefik.http.routers.vault.entrypoints=web"
+  #   - "traefik.http.routers.vault.rule=PathPrefix(`/`)"
+  #   - "traefik.http.services.vault.loadbalancer.server.port=8200"
 
   # backend:
   #   build:
@@ -72,5 +109,37 @@ services:
   #   depends_on: 
   #     - etaireia-mongo
 
+  #-----------------------------------------
+  # Storage
+  #-----------------------------------------
+
+  postgres:
+    image: "postgres:13.7"
+    hostname: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
+      PGDATA: "/data/postgres"
+    labels:
+      - "dev-kit.provided=true"
+    volumes:
+       - postgres-db-data:/data/postgres
+       - ../init/postgres/pginit.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
+
+  mongo:
+    image: mongo:latest
+    restart: on-failure
+    environment:
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - ./data/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodb_data_container:/data/db
+    ports:
+      - "27017:27017"
+
 volumes:
+  postgres-db-data:
   mongodb_data_container:

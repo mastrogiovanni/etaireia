@@ -49,3 +49,20 @@ cinquecentomila.
 
 https://developers.google.com/docs/api/how-tos/merge
 
+
+
+# YouSign
+
+I dati sono crittografati al momento dell'archiviazione con l'algoritmo di crittografia a chiave simmetrica AES e una chiave di 256 bit controllata da Yousign. 
+I dati in transito sono crittografati con il protocollo TLS. Sono autorizzate soltanto le versioni di TLS allo stato dell'arte.
+
+
+Arkhineo, archivio terzo certificato a livello europeo (Archivio Dati per Conservazione)
+
+PDF => PADES
+
+OTP tramite SMS
+
+
+
+
