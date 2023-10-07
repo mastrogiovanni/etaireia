@@ -36,7 +36,7 @@
 
 	{#if credentials && credentials.length > 0}
 
-		{#each credentials as credential, index}
+		{#each credentials as credential, index (credential.publicKey)}
 
 			<CredentialCard credential={credential} index={index} deleteCredential={_deleteCredential}></CredentialCard>
 

@@ -21,4 +21,9 @@ export async function createCredential(
     return await response.json()
 }
 
-
+export async function getCredentialStatus(hexPublicKey: string) {
+    let response = await fetch(`/signer/api/v1/credential/${hexPublicKey}`, {
+        method: "GET"
+    })
+    return await response.json()
+}
