@@ -1,36 +1,72 @@
-<script>
+<script lang="ts">
+  import { approveCredential, rejectCredential } from "$lib/api";
 
-    import { Card, Modal, Table, TableHead, TableHeadCell, Checkbox, TableBody, TableBodyRow, TableBodyCell, Gallery, Button } from "flowbite-svelte";
-    import { onMount } from "svelte";
+  import { Modal, Table, Checkbox, TableBody, TableBodyRow, TableBodyCell, Gallery, Button, type ImgType, Img } from "flowbite-svelte";
 
-    export let personToValidate = new Object()
-    export let open = false
+  export let personToValidate: any;
+  export let open = false
+  export let command = () => {}
 
-    let selectedImage = undefined
+  let selectedImage: ImgType | undefined = undefined
 
-    let images = []
-    
-    // onMount(() => {
-    //   images = personToValidate.images
-    //   images[0]
-    // })
-
-    $: {
-      if (personToValidate) {
-        images = personToValidate.images
-        if (images && images.length > 0) {
-          selectedImage = images[0]
-        }
-      }
+  let images: ImgType[] = []
+  
+  $: {
+    if (personToValidate) {
+      images = [
+        { alt: 'front', src: '/signer/api/v1/document/signer/front/' + personToValidate?.id },
+        { alt: 'back', src: '/signer/api/v1/document/signer/back/' + personToValidate.id },
+      ]
+      selectedImage = images[0]
     }
+  }
 
-    function selectImage(image) {
-        selectedImage = image
+  let checkFiscalCode = false;
+  let checkDocument = false;
+  let checkPlaceOfBirth = false;
+  let checkDateOfBirth = false;
+  let checkDocumentExpireTime = false;
+
+  let approvalDisabled = false
+
+  $: {
+    approvalDisabled = !(checkFiscalCode && checkDocument && checkPlaceOfBirth && checkDateOfBirth && checkDocumentExpireTime)
+  }
+
+  function selectImage(image: { src: any; alt: any; } | undefined) {
+      selectedImage = image
+  }
+
+  function getDocumentType(docType: string) {
+    if (docType === "CI") {
+      return "Carta d'Identità"
     }
+    if (docType === "PT") {
+      return "Patente"
+    }
+    if (docType === "PS") {
+      return "Passaporto"
+    }
+    return docType
+  }
+
+  async function _approve() {
+    let resp = await approveCredential(personToValidate.hexPublicKey)
+    console.log(resp)
+    open = false
+    command()
+  }
+
+  async function _reject() {
+    let resp = await rejectCredential(personToValidate.hexPublicKey)
+    console.log(resp)
+    open = false
+    command()
+  }
 
 </script>
 
-<Modal title="Approvazione Utente: {personToValidate.name} {personToValidate.surname}" bind:open={open} autoclose size="lg">
+<Modal title="Approvazione Utente: {personToValidate?.name} {personToValidate?.surname}" bind:open={open} autoclose size="lg">
 
   <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
     Verifica che i dati sulle foto della carta siano uguali ai dati qui sotto.<br/>
@@ -40,62 +76,62 @@
   <div class="m-12 mb-2 mt-2">
 
   <Table hoverable={true} shadow color="green">
-    <TableBody class="divide-y">
+    <TableBody tableBodyClass="divide-y">
       <TableBodyRow>
         <TableBodyCell class="!p-4">
-          <Checkbox />
+          <Checkbox bind:checked={checkFiscalCode} />
         </TableBodyCell>
         <TableBodyCell>Codice Fiscale</TableBodyCell>
         <TableBodyCell>{personToValidate.fiscalCode}</TableBodyCell>
       </TableBodyRow>
       <TableBodyRow>
         <TableBodyCell class="!p-4">
-          <Checkbox />
+          <Checkbox bind:checked={checkDocument} />
+        </TableBodyCell>
+        <TableBodyCell>Documento</TableBodyCell>
+        <TableBodyCell>{getDocumentType(personToValidate.documentType)}: {personToValidate.documentId}</TableBodyCell>
+      </TableBodyRow>
+      <TableBodyRow>
+        <TableBodyCell class="!p-4">
+          <Checkbox bind:checked={checkPlaceOfBirth} />
         </TableBodyCell>
         <TableBodyCell>Luogo Nascita</TableBodyCell>
-        <TableBodyCell>{personToValidate.birthPlace}</TableBodyCell>
+        <TableBodyCell>{personToValidate.placeOfBirth}</TableBodyCell>
       </TableBodyRow>
       <TableBodyRow>
         <TableBodyCell class="!p-4">
-          <Checkbox />
+          <Checkbox bind:checked={checkDateOfBirth} />
         </TableBodyCell>
         <TableBodyCell>Data Nascita</TableBodyCell>
-        <TableBodyCell>{personToValidate.birthDate}</TableBodyCell>
+        <TableBodyCell>{personToValidate.dateOfBirth}</TableBodyCell>
       </TableBodyRow>
       <TableBodyRow>
         <TableBodyCell class="!p-4">
-          <Checkbox />
-        </TableBodyCell>
-        <TableBodyCell>Data Emissione Documento</TableBodyCell>
-        <TableBodyCell>{personToValidate.cardEmission}</TableBodyCell>
-      </TableBodyRow>
-      <TableBodyRow>
-        <TableBodyCell class="!p-4">
-          <Checkbox />
+          <Checkbox bind:checked={checkDocumentExpireTime} />
         </TableBodyCell>
         <TableBodyCell>Data Scadenza Documento</TableBodyCell>
-        <TableBodyCell>{personToValidate.cardExpire}</TableBodyCell>
+        <TableBodyCell>{personToValidate.documentExpireTime}</TableBodyCell>
       </TableBodyRow>
     </TableBody>
   </Table>
 
   </div>
 
-  {#if selectedImage}
   <Gallery class="gap-4">
-      <img src={selectedImage.src} alt={selectedImage.alt} class="h-auto max-w-full rounded-lg" />
+      {#if selectedImage}
+        <img src={selectedImage.src} alt={selectedImage.alt} class="h-auto max-w-full rounded-lg" />
+      {/if}
       <Gallery class="grid-cols-5" items={images} let:item>
           <div class="p-1" on:click={() => selectImage(item) }>
-              <img src={item.src} alt={item.alt} class="h-auto max-w-full" />
+              <img src={item?.src} alt={item?.alt} class="h-auto max-w-full" />
           </div>
       </Gallery>
   </Gallery>
-  {/if}
 
   <svelte:fragment slot="footer">
-    <Button on:click={() => alert('Handle "success"')}>Approve</Button>
+    <Button color="green" disabled={approvalDisabled} on:click={_approve}>Approva Credenziale</Button>
+    <Button color="red" on:click={_reject}>Rigetta</Button>
     <Button color="alternative">Cancella</Button>
   </svelte:fragment>
-
 
 </Modal>

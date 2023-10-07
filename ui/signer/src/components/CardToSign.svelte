@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Card, Button, DescriptionList } from "flowbite-svelte";
+	import { Card, Button } from "flowbite-svelte";
 	import { Icon } from "flowbite-svelte-icons";
 
     export let title = ""

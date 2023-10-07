@@ -1,5 +1,6 @@
 import { generateMnemonic, mnemonicToSeedSync, setDefaultWordlist } from 'bip39';
 import { ed25519 } from '@noble/curves/ed25519'
+import { createCredential } from './api';
 
 export 	function loadCredentials() {
     let ds = localStorage.getItem('digital.signature');
@@ -41,13 +42,18 @@ export function deleteCredential(index: number) {
     return credentials
 }
 
-export async function requestCredential(mnemonic: string, data: any, password: string) {
+export async function requestCredential(mnemonic: string, data: any, password: string, front: File | undefined | null, back: File | undefined | null) {
     let privateKey = getPrivateKey(mnemonic, password)
     const publicKey = await ed25519.getPublicKey(privateKey);
-
-    // TODO send documents and public key generated 
-
-    return addCredential(data, mnemonic, Buffer.from(publicKey).toString('hex'))
+    data['hexPublicKey'] = Buffer.from(publicKey).toString('hex')
+    let response = await createCredential(data, front, back)
+    if (response?.success) {
+        return addCredential(data, mnemonic, Buffer.from(publicKey).toString('hex'))
+    }
+    else {
+        console.log("Error")
+        return {}
+    }
 }
 
 /**

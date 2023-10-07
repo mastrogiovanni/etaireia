@@ -1,5 +1,5 @@
 // In dev mode
-export let baseUrl = "http://localhost"
+export const baseUrl = "http://localhost"
 
 // In prod mode
-// export let baseUrl = ""
+// export const baseUrl = ""

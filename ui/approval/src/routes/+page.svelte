@@ -1,5 +1,8 @@
 <script>
     import {
+        Badge,
+        Button,
+        Modal,
         Table,
         TableBody,
         TableBodyCell,
@@ -8,11 +11,6 @@
         TableHeadCell,
         TableSearch,
     } from "flowbite-svelte";
-    import { Button, Modal } from 'flowbite-svelte';
-    import { Alert } from "flowbite-svelte";
-    import { Gallery } from 'flowbite-svelte';
-    import { Card } from 'flowbite-svelte';
-    import { Checkbox } from 'flowbite-svelte';
     import {
         Navbar,
         NavBrand,
@@ -22,27 +20,14 @@
     } from "flowbite-svelte";
     import { onMount } from "svelte";
     import DocumentApproval from "../components/DocumentApproval.svelte";
+    import { deleteCredential, getSigners } from "$lib/api";
+
     let searchTerm = "";
 
-    const michele_imgs = [
-        { alt: 'michele-fronte', src: '/imgs/michele/fronte.png' },
-        { alt: 'michele-retro', src: '/imgs/michele/retro.png' },
-    ]
-
-    const micaela_imgs = [
-        { alt: 'micaela-fronte', src: '/imgs/micaela/fronte.png' },
-        { alt: 'micaela-retro', src: '/imgs/micaela/retro.png' },
-    ]
-
-    const tommaso_imgs = [
-        { alt: 'tommaso-fronte', src: '/imgs/tommaso/fronte.jpeg' },
-    ]
-
-    let items = [
-        { id: 1, name: "Michele", surname: "Mastrogiovanni", fiscalCode: "MSTMHL80E19D708X", birthPlace: "Formia (LT)", birthDate: "19/05/1980", cardEmission: "16/06/20", cardExpire: "19/05/2031", images: michele_imgs },
-        { id: 2, name: "Micaela", surname: "Spinosa", fiscalCode: "MSTMHL80E19D708X", birthPlace: "Gaeta (LT)", birthDate: "19/05/1980", cardEmission: "16/06/20", cardExpire: "19/05/2031", images: micaela_imgs },
-        { id: 3, name: "Tommaso", surname: "Spinosa", fiscalCode: "MSTMHL80E19D708X", birthPlace: "Gaeta (LT)", birthDate: "19/05/1980", cardEmission: "16/06/20", cardExpire: "19/05/2031", images: tommaso_imgs },
-    ];
+    /**
+     * @type {any[]}
+     */
+    let items = []
 
     $: filteredItems = items.filter(
         (item) =>
@@ -53,25 +38,110 @@
     
     let defaultModal = false
 
+    /**
+     * @param {any} item
+     */
     function open(item) {
-        console.log("test")
         selectedItem = item
         defaultModal = true
     }
 
+    async function reloadData() {
+        let result = await getSigners()
+        if (result?.success) {
+            items = result?.data
+            items.sort((a, b) => {
+                if (a.id < b.id) {
+                    return -1
+                }
+                if (a.id > b.id) {
+                    return 1
+                }
+                return 0
+            })
+        }
+    }
+
+    onMount(reloadData)
+
+    /**
+     * @param {number} status
+     */
+    function getApprovalColor(status) {
+        switch (status) {
+            case 0: return "yellow"
+            case 1: return "green"
+            case 2: return "red"
+            case 3: return "dark"
+        }
+        return "none"
+    }
+
+    /**
+     * @param {number} status
+     */
+     function getApprovalLabel(status) {
+        switch (status) {
+            case 0: return "Da Approvare"
+            case 1: return "Approvato"
+            case 2: return "Rigettato"
+            case 3: return "Eliminato"
+        }
+        return status
+    }
+
+    async function approvedOrRejected() {
+        await reloadData()
+    }
+
+    async function _deleteItem() {
+        let resp = await deleteCredential(itemToDelete.hexPublicKey)
+        console.log(resp);
+        itemToDelete = undefined
+        confirmModalOpen = false
+        await reloadData();
+    }
+
+    /**
+     * @type {{ hexPublicKey: any; } | undefined}
+     */
+    let itemToDelete;
+
+    /**
+     * @param {{ hexPublicKey: string; }} item
+     */
+     async function _delete(item) {
+        itemToDelete = item;
+        confirmModalOpen = true
+    }
+
+    let confirmModalOpen = false;
+
 </script>
 
-<DocumentApproval personToValidate={selectedItem} bind:open={defaultModal} />
+{#if selectedItem}
+    <DocumentApproval command={approvedOrRejected} personToValidate={selectedItem} bind:open={defaultModal} />
+{/if}
 
+<Modal title="Conferma Eliminazione" bind:open={confirmModalOpen} autoclose size="lg">
+
+    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+        Sei sicuro di voler eliminare questa credenziale?<br/>
+        L'utente collegato non potrà più firmare documenti con questa credenziale.
+    </p>
+
+    <div class="m-12 mb-2 mt-2">
+    </div>
+
+    <svelte:fragment slot="footer">
+        <Button on:click={_deleteItem}>Approva Eliminazione</Button>
+        <Button color="alternative">Cancella</Button>
+    </svelte:fragment>
+
+</Modal>
+  
 <Navbar let:hidden let:toggle>
-    <NavBrand href="/">
-        <!--
-        <img
-            src="/images/flowbite-svelte-icon-logo.svg"
-            class="mr-3 h-6 sm:h-9"
-            alt="Flowbite Logo"
-        />
-        -->
+    <NavBrand href="/approval">
         <span
             class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
             >Cerchi D'Onda</span
@@ -79,13 +149,7 @@
     </NavBrand>
     <NavHamburger on:click={toggle} />
     <NavUl {hidden}>
-        <NavLi href="/">Home</NavLi>
-        <!--
-        <NavLi href="/about">About</NavLi>
-        <NavLi href="/docs/components/navbar">Navbar</NavLi>
-        <NavLi href="/pricing">Pricing</NavLi>
-        <NavLi href="/contact">Contact</NavLi>
-        -->
+        <NavLi href="/approval">Home</NavLi>
     </NavUl>
 </Navbar>
 
@@ -105,14 +169,22 @@
             <TableHeadCell>ID</TableHeadCell>
             <TableHeadCell>Nome</TableHeadCell>
             <TableHeadCell></TableHeadCell>
+            <TableHeadCell></TableHeadCell>
         </TableHead>
-        <TableBody class="divide-y">
+        <TableBody tableBodyClass="divide-y">
             {#each filteredItems as item}
                 <TableBodyRow>
-                    <TableBodyCell>{item.id}</TableBodyCell>
-                    <TableBodyCell>{item.name} {item.surname}</TableBodyCell>
+                    <TableBodyCell>{item?.id}</TableBodyCell>
+                    <TableBodyCell>{item?.name}</TableBodyCell>
+                    <TableBodyCell><Badge color={getApprovalColor(item.status)}>{getApprovalLabel(item?.status)}</Badge></TableBodyCell>
                     <TableBodyCell>
-                        <a href="#!" class="font-medium text-primary-600 hover:underline dark:text-primary-500" on:click={() => open(item)}>Edit</a>
+                        {#if item?.status === 0}
+                            <a href="#!" class="font-medium text-primary-600 hover:underline dark:text-primary-500" on:click={() => open(item)}>Edit</a>
+                        {:else}
+                            {#if item?.status === 1}
+                                <Button on:click={() => { _delete(item) }}>Elimina</Button>
+                            {/if}
+                        {/if}
                       </TableBodyCell>
                 </TableBodyRow>
             {/each}

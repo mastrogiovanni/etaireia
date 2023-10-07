@@ -29,13 +29,11 @@
 			Home
 		</NavLi>
 		<NavLi on:click={toggle} href="/signer/credenziali">Credenziali</NavLi>
-		<!--
 		<NavLi on:click={toggle} href="/signer/documenti">
 			Documenti
 			&nbsp;
 			<Indicator color="blue" border size="xl" placement="right" class="text-xs font-bold">18</Indicator>
 		</NavLi>
-		-->
 		<NavLi on:click={toggle} href="/signer/whoweare">Chi siamo</NavLi>
 	</NavUl>
 </Navbar>
