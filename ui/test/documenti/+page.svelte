@@ -2,10 +2,10 @@
 
 	import { Button, TabItem, Tabs, Modal } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
-	import DrawerSign from '../../components/DrawerSign.svelte';
-	import CardToSign from '../../components/CardToSign.svelte';
-	import DrawerDocument from '../../components/DrawerDocument.svelte';
-	import CardToView from '../../components/CardToView.svelte';
+	import DrawerSign from '../../signer/src/components/DrawerSign.svelte';
+	import CardToSign from '../../signer/src/components/CardToSign.svelte';
+	import DrawerDocument from '../../signer/src/components/DrawerDocument.svelte';
+	import CardToView from '../../signer/src/components/CardToView.svelte';
 	import { baseUrl } from '$lib/constants';
 
 	let selectedDocument: any;

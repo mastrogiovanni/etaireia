@@ -14,11 +14,11 @@
 	}
 
 	onMount(async () => {
-		if (browser) {
-			const { Buffer } = await import('buffer');
-			window.Buffer = Buffer;
-		}
-		setDefaultWordlist('italian');
+		// if (browser) {
+		// 	const { Buffer } = await import('buffer');
+		// 	window.Buffer = Buffer;
+		// }
+		// setDefaultWordlist('italian');
 		credentials = loadCredentials();
 	});
 

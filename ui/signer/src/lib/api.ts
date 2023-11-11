@@ -27,3 +27,10 @@ export async function getCredentialStatus(hexPublicKey: string) {
     })
     return await response.json()
 }
+
+export async function getDocumentsToSign(fiscalCode: string, email: string) {
+    let response = await fetch(`/signer/api/v1/signable/${email}/${fiscalCode}`, {
+        method: "GET"
+    })
+    return await response.json()
+}

@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { baseUrl } from '$lib/constants';
 	import { Gallery } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
 
     let contacts: any[] = []
 
     onMount(async () => {
-        let resp = await fetch(baseUrl + "/json/api/v1/contacts")
+        let resp = await fetch("/json/api/v1/contacts")
 		contacts = await resp.json()
     })
 </script>

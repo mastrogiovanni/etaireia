@@ -7,7 +7,13 @@ export 	function loadCredentials() {
     if (!ds) {
         return [];
     }
-    return JSON.parse(ds);
+    try {
+        return JSON.parse(ds);
+    }
+    catch (e) {
+        console.log(e)
+    }
+    return []
 }
 
 /**

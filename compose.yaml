@@ -24,6 +24,19 @@ services:
      # echo $(htpasswd -nB michele.mastrogiovanni@gmail.com) | sed -e s/\\$/\\$\\$/g
      # - "traefik.http.middlewares.traefik-auth.basicauth.users=michele.mastrogiovanni@gmail.com:$$2y$$05$$FYl85XcjF1P9dy3lQ/qhAe7gWRngAbTCIZOpgB/kkLxD3IYAABtPO"
 
+  documents-serving:
+    image: nginx:1.23.4
+    restart: always
+    volumes:
+      - "./signer-docs:/usr/share/nginx/html/static/documents:ro"
+    labels:
+      - "docker.project=etaireia"
+      - "dev-kit.provided=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.documents-serving.entrypoints=web"
+      - "traefik.http.routers.documents-serving.rule=PathPrefix(`/static/documents`)"
+      - "traefik.http.services.documents-serving.loadbalancer.server.port=80"
+
   signer:
     image: node:18.18.0
     restart: on-failure

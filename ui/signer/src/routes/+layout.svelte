@@ -4,7 +4,6 @@
 	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Indicator } from 'flowbite-svelte';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { baseUrl } from '$lib/constants';
 
 	$: activeUrl = $page.url.pathname;
 	let activeClass = 'text-white bg-green-700 md:bg-transparent md:text-green-700 md:dark:text-white dark:bg-green-600 md:dark:bg-transparent';
@@ -13,7 +12,7 @@
 	let company: {name: string} = { name: "-" }
 
 	onMount(async () => {
-		let resp = await fetch(baseUrl + "/json/api/v1/company")
+		let resp = await fetch("/json/api/v1/company")
 		company = await resp.json()
 	})
 
@@ -29,13 +28,11 @@
 			Home
 		</NavLi>
 		<NavLi on:click={toggle} href="/signer/credenziali">Credenziali</NavLi>
-		<!--
 		<NavLi on:click={toggle} href="/signer/documenti">
 			Documenti
 			&nbsp;
 			<Indicator color="blue" border size="xl" placement="right" class="text-xs font-bold">18</Indicator>
 		</NavLi>
-		-->
 		<NavLi on:click={toggle} href="/signer/whoweare">Chi siamo</NavLi>
 	</NavUl>
 </Navbar>

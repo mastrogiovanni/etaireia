@@ -13,9 +13,10 @@
   
   $: {
     if (personToValidate) {
+      console.log(personToValidate)
       images = [
-        { alt: 'front', src: '/signer/api/v1/document/signer/front/' + personToValidate?.id },
-        { alt: 'back', src: '/signer/api/v1/document/signer/back/' + personToValidate.id },
+        { alt: 'front', src: `/static/documents/${personToValidate?.backDocumentUUID}` },
+        { alt: 'back', src: `/static/documents/${personToValidate?.frontDocumentUUID}` }
       ]
       selectedImage = images[0]
     }

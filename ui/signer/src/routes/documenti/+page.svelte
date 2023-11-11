@@ -1,24 +1,35 @@
 <script lang="ts">
 
-	import { Button, TabItem, Tabs, Modal } from 'flowbite-svelte';
 	import { onMount } from 'svelte';
+
+	import { Button, TabItem, Tabs, Modal, Label } from 'flowbite-svelte';
 	import DrawerSign from '../../components/DrawerSign.svelte';
 	import CardToSign from '../../components/CardToSign.svelte';
 	import DrawerDocument from '../../components/DrawerDocument.svelte';
 	import CardToView from '../../components/CardToView.svelte';
-	import { baseUrl } from '$lib/constants';
+	import { Select } from 'flowbite-svelte';
+	import { loadCredentials } from '$lib/credential';
+	import { getDocumentsToSign } from '$lib/api';
 
+	// Selected document
 	let selectedDocument: any;
 
+	// All documents
 	let allDocuments: any[] = []
-	let documenti: any[] = []
+
+	// Documents to be signed
+	let documentsToSign: any[] = []
+
+	// Credentials that can be used
+	let credentials: any[] = []
+
+	let credentialSelected: any;
 
 	let hideSignDrawer = true
 	let hideDocumentDrawer = true
 	let signedModal = false;
 
 	function show(document: any) {
-		console.log("Show", document)
 		selectedDocument = document
 		hideSignDrawer = true
 		hideDocumentDrawer = false
@@ -30,22 +41,47 @@
 		hideSignDrawer = false
 	}
 
-	onMount(async () => {
-		let resp = await fetch(baseUrl + "/json/api/v1/waiting")
-		documenti = await resp.json()
-
-		resp = await fetch(baseUrl + "/json/api/v1/documents")
-		allDocuments = await resp.json()
-	})
-
 	async function signSent(publicKey: string) {
-		console.log("Signed", document)
 		signedModal = true
 		hideSignDrawer = true
 		hideDocumentDrawer = true
 	}
 
+	async function changedCredential() {
+		console.log(credentialSelected)
+		if (!credentialSelected) {
+			documentsToSign = []
+			return
+		}
+		let response = await getDocumentsToSign(credentialSelected.fiscalCode, credentialSelected.email)
+		if (response?.success) {
+			documentsToSign = response.data
+			console.log(documentsToSign)
+		}
+	}
+	
+	onMount(async () => {
+		let result = loadCredentials();
+		credentials = result.map((x: { data: { fiscalCode: any; email: any; name: any; }; }) => { return {
+			value: {
+				fiscalCode: x.data.fiscalCode,
+				email: x.data.email
+			},
+			name: `${x.data.name} (${x.data.fiscalCode})`
+		}})
+
+		// documentsToSign = await getDocumentsToSign()
+		// resp = await fetch(/json/api/v1/documents")
+		// allDocuments = await resp.json()
+	})
+
+
 </script>
+
+<Label>
+	Select an option
+	<Select on:change={changedCredential} class="mt-2" items={credentials} bind:value={credentialSelected} />
+</Label>
 
 {#if selectedDocument}
 
@@ -73,6 +109,21 @@
 	</svelte:fragment>
 </Modal>
 
+<div class="grid place-items-center">
+
+{#each documentsToSign as document}
+<CardToSign 
+	title={document.title}
+	description={document.description}
+	img={document.img}
+	href={document.href} 
+	show={() => show(document)}
+	sign={() => sign(document)} />
+{/each}
+
+</div>
+
+<!--
 <div class="grid place-items-center">
 
 <Tabs>
@@ -106,4 +157,5 @@
 </Tabs>
 
 </div>
+-->
 
